@@ -66,7 +66,7 @@ class UserRequest(BaseModel):
                 "email": "my.email@example.com",
                 "first_name": "My first name",
                 "last_name": "My last name",
-                "hashed_password": "1234-1234-1234-1234",
+                "password": "1234-1234-1234-1234",
                 "is_active": True,
                 "role": "Admin status"
             }
@@ -76,3 +76,7 @@ class UserRequest(BaseModel):
     @classmethod
     def hash_password(cls, password: PasswordType) -> PasswordType:
         return bcrypt_context.hash(password)
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = 'bearer'

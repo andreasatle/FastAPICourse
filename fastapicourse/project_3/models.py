@@ -36,3 +36,4 @@ class Todos(Base):
         self.description = todo_request.description
         self.priority = todo_request.priority
         self.completed = todo_request.completed
+
