@@ -22,6 +22,9 @@ class Users(Base):
         self.is_active = user_request.is_active
         self.role = user_request.role
 
+    def __str__(self):
+        return f"User(id={self.id}, username={self.username}, email={self.email}, first_name={self.first_name}, last_name={self.last_name}, hashed_password={self.hashed_password}, is_active={self.is_active}, role={self.role})"
+
 class Todos(Base):
     __tablename__ = "todos"
     id = Column(Integer, primary_key=True, index=True)

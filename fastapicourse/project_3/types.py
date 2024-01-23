@@ -1,22 +1,15 @@
 from fastapicourse.project_3 import database
 from typing import Annotated
-from sqlalchemy.orm import Session
 from fastapi import Depends
 from pydantic import BaseModel, Field, field_validator
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth_bearer = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-SessionType = Annotated[Session, Depends(get_db)]
-AuthType = Annotated[OAuth2PasswordRequestForm, Depends()]
+AuthDep = Annotated[OAuth2PasswordRequestForm, Depends()]
+OAuthBearerDep = Annotated[str, Depends(oauth_bearer)]
 
 IdType = Annotated[int, Field(gt=0)]
 
