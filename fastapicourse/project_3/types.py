@@ -23,6 +23,7 @@ UsernameType = Annotated[str, Field(min_length=3, max_length=50)]
 FirstnameType = Annotated[str, Field(min_length=3, max_length=50)]
 LastnameType = Annotated[str, Field(min_length=3, max_length=50)]
 PasswordType = Annotated[str, Field(min_length=3, max_length=64, alias='password')]
+UnaliasPasswordType = Annotated[str, Field(min_length=3, max_length=64)]
 IsActiveType = Annotated[bool, Field(default=False)]
 RoleType = Annotated[str, Field(min_length=3, max_length=50)]
 
@@ -69,6 +70,18 @@ class UserRequest(BaseModel):
     @classmethod
     def hash_password(cls, password: PasswordType) -> PasswordType:
         return bcrypt_context.hash(password)
+
+class PasswordRequest(BaseModel):
+    old_password: UnaliasPasswordType
+    new_password: UnaliasPasswordType
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "old_password": "old password",
+                "new_password": "new password",
+            }
+        }
 
 class Token(BaseModel):
     access_token: str
