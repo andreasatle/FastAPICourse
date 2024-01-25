@@ -20,8 +20,9 @@ CompletedType = Annotated[bool, Field(default=False)]
 
 EmailType = Annotated[str, Field(min_length=3, max_length=50)]
 UsernameType = Annotated[str, Field(min_length=3, max_length=50)]
-FirstnameType = Annotated[str, Field(min_length=3, max_length=50)]
-LastnameType = Annotated[str, Field(min_length=3, max_length=50)]
+FirstnameType = Annotated[str, Field(min_length=1, max_length=50)]
+LastnameType = Annotated[str, Field(min_length=1, max_length=50)]
+PhoneNumberType = Annotated[str, Field(min_length=3, max_length=20)]
 PasswordType = Annotated[str, Field(min_length=3, max_length=64, alias='password')]
 UnaliasPasswordType = Annotated[str, Field(min_length=3, max_length=64)]
 IsActiveType = Annotated[bool, Field(default=False)]
@@ -48,6 +49,7 @@ class UserRequest(BaseModel):
     email: EmailType
     first_name: FirstnameType
     last_name: LastnameType
+    phone_number: PhoneNumberType
     hashed_password: PasswordType
     is_active: IsActiveType
     role: RoleType
@@ -60,9 +62,10 @@ class UserRequest(BaseModel):
                 "email": "my.email@example.com",
                 "first_name": "My first name",
                 "last_name": "My last name",
-                "password": "1234-1234-1234-1234",
+                "phone_number": "123-4567-8901",
+                "password": "qwe123",
                 "is_active": True,
-                "role": "Admin status"
+                "role": "admin"
             }
         }
     

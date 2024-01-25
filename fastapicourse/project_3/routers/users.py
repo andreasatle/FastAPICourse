@@ -44,3 +44,20 @@ async def update_password(
     db.add(user)
     db.commit()
 
+@router.put('/update/phone_number/{phone_number}', status_code=status.HTTP_204_NO_CONTENT)
+async def update_phone_number(
+    user: UserDep,
+    phone_number: types.PhoneNumberType,
+    db: SessionDep
+):
+    # Validate that the user exists
+    if user is None:
+        raise HTTPException(
+            status_code = status.HTTP_401_UNAUTHORIZED,
+            detail = "Could not validate credentials"
+        )
+
+    # Change phone number and save to database
+    user.phone_number = phone_number
+    db.add(user)
+    db.commit()

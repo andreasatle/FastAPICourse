@@ -9,6 +9,7 @@ class Users(Base):
     email = Column(String(50), unique=True)
     first_name = Column(String(50))
     last_name = Column(String(50))
+    phone_number = Column(String(20))
     hashed_password = Column(String(64))
     is_active = Column(Boolean, default=True)
     role = Column(String(50))
@@ -18,6 +19,7 @@ class Users(Base):
         self.email = user_request.email
         self.first_name = user_request.first_name
         self.last_name = user_request.last_name
+        self.phone_number = user_request.phone_number
         self.hashed_password = user_request.hashed_password
         self.is_active = user_request.is_active
         self.role = user_request.role
