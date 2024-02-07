@@ -1,112 +1,15 @@
 import os
-from sqlalchemy import create_engine, text
-from sqlalchemy.pool import StaticPool
 from fastapicourse.tailwind.main import app
-from fastapicourse.tailwind.routes.auth import get_current_user, CreateUserRequest
+from fastapicourse.tailwind.routes.auth import get_current_user
 from dotenv import load_dotenv
-from fastapicourse.tailwind.models import Users, Todos
+from fastapicourse.tailwind.models import Todos
 from sqlalchemy.orm import sessionmaker
 from fastapicourse.tailwind.database import Base, get_db
-from fastapi.testclient import TestClient
-import pytest
 
-
-load_dotenv()
-
-TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
-
-# Setting up the tesing database
-engine = create_engine(TEST_DATABASE_URL, poolclass=StaticPool)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base.metadata.create_all(bind=engine)
-
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-def override_get_current_user():
-    db = TestingSessionLocal()
-    user = db.query(Users).filter(Users.username == "Sven").first()
-    return user
-
-def create_user():
-    user_request1 = CreateUserRequest(
-        username = "Sven",
-        email = "sven@svenson.com",
-        first_name = "Sven",
-        last_name = "Svenson",
-        phone_number = "123-456-7890",
-        password = "qwe123",
-        is_active = True,
-        role = None
-    )
-    user_request2 = CreateUserRequest(
-        username = "Arne",
-        email = "arne@arneson.com",
-        first_name = "Arne",
-        last_name = "Arneson",
-        phone_number = "321-654-9876",
-        password = "123ewq",
-        is_active = False,
-        role = "admin"
-    )
-
-    user1 = Users(**user_request1.model_dump(),id=1)
-    user2 = Users(**user_request2.model_dump(),id=2)
-    db = TestingSessionLocal()
-    db.add(user1)
-    db.add(user2)
-    db.commit()
-    db.close()
-
-def create_todos():
-    user = override_get_current_user()
-
-    todo1 = Todos(
-        id=1,
-        title = "Todo1",
-        description = "This is a test todo 1",
-        priority = 1,
-        completed = False,
-        owner_id=user.id
-    )
-
-    todo2 = Todos(
-        id=2,
-        title = "Todo2",
-        description = "This is a test todo 2",
-        priority = 2,
-        completed = True,
-        owner_id=user.id
-    )
-
-    db = TestingSessionLocal()
-    db.add(todo1)
-    db.add(todo2)
-    db.commit()
+from .utils import *
 
 app.dependency_overrides[get_db] = override_get_db
 app.dependency_overrides[get_current_user] = override_get_current_user
-
-def clear_tables():
-    with engine.connect() as conn:
-        conn.execute(text('DELETE FROM todos;'))
-        conn.execute(text('DELETE FROM users;'))
-        conn.commit()
-
-@pytest.fixture
-def setup_db_todo():
-    create_user()
-    create_todos()
-
-    yield
-
-    clear_tables()
-
-client = TestClient(app)
 
 def test_get_todos(setup_db_todo):
     user = override_get_current_user()
@@ -215,3 +118,29 @@ def test_update_todo(setup_db_todo):
     assert todo.completed == False
     assert todo.owner_id == user.id
 
+    response = client.put("/todos/update/3", json={
+        "title": "Todo4",
+        "description": "This is a test todo 4",
+        "priority": 4,
+        "completed": False,
+        "owner_id": user.id
+    })
+    assert response.status_code == 404, 'status code should be 404'
+
+
+def test_delete_todo(setup_db_todo):
+    user = override_get_current_user()
+    assert user.id is not None, 'User should have an id'
+
+    response = client.delete("/todos/delete/2")
+    assert response.status_code == 204, 'status code should be 204'
+
+    db = TestingSessionLocal()
+    number_of_todos = db.query(Todos).count()
+    todo = db.query(Todos).filter(Todos.id == 2).first()
+    db.close()
+    assert number_of_todos == 1, 'There should be 1 todo after the delete'
+    assert todo is None, 'Todo with id 2 should not exist'
+
+    response = client.delete("/todos/delete/3")
+    assert response.status_code == 404, 'status code should be 404'
