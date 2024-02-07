@@ -1,5 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from starlette import status
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
 from fastapicourse.project_3 import models
 from fastapicourse.project_3 import database
 from fastapicourse.project_3 import types
@@ -9,9 +13,22 @@ from .auth import get_current_user
 from fastapi import Depends
 from typing import Annotated
 
-router = APIRouter(prefix="/todos", tags=["todos"])
+from pathlib import Path
+
+# Convoluted (but correct) way to get the path to the templates directory.
+root_dir = Path(__file__).resolve().parent.parent
+template_dir = Path.joinpath(root_dir, "templates")
+
+router = APIRouter(prefix="/todosv2", tags=["todosv2"])
+
+templates = Jinja2Templates(directory=template_dir)
 
 UserDep = Annotated[models.Users, Depends(get_current_user)]
+
+
+@router.get("/test")
+async def test_page(request: Request):
+    return templates.TemplateResponse(request, "test.html", {})
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
@@ -22,7 +39,8 @@ async def read_all_todos(user: UserDep, db: SessionDep):
             detail="Could not validate credentials",
         )
 
-    return db.query(models.Todos).filter(models.Todos.owner_id == user.id).all()
+    todos = db.query(models.Todos).filter(models.Todos.owner_id == user.id).all()
+    return templates.TemplateResponse(request, "test.html", {})
 
 
 @router.get("/{id}", status_code=status.HTTP_200_OK)

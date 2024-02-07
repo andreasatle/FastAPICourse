@@ -23,10 +23,11 @@ UsernameType = Annotated[str, Field(min_length=3, max_length=50)]
 FirstnameType = Annotated[str, Field(min_length=1, max_length=50)]
 LastnameType = Annotated[str, Field(min_length=1, max_length=50)]
 PhoneNumberType = Annotated[str, Field(min_length=3, max_length=20)]
-PasswordType = Annotated[str, Field(min_length=3, max_length=64, alias='password')]
+PasswordType = Annotated[str, Field(min_length=3, max_length=64, alias="password")]
 UnaliasPasswordType = Annotated[str, Field(min_length=3, max_length=64)]
 IsActiveType = Annotated[bool, Field(default=False)]
 RoleType = Annotated[str, Field(min_length=3, max_length=50)]
+
 
 class TodoRequest(BaseModel):
     title: TitleType
@@ -40,9 +41,10 @@ class TodoRequest(BaseModel):
                 "title": "This is my ToDo",
                 "description": "This is my description of my ToDo",
                 "priority": 3,
-                "completed": False
+                "completed": False,
             }
         }
+
 
 class UserRequest(BaseModel):
     username: UsernameType
@@ -65,14 +67,15 @@ class UserRequest(BaseModel):
                 "phone_number": "123-4567-8901",
                 "password": "qwe123",
                 "is_active": True,
-                "role": "admin"
+                "role": "admin",
             }
         }
-    
+
     @field_validator("hashed_password")
     @classmethod
     def hash_password(cls, password: PasswordType) -> PasswordType:
         return bcrypt_context.hash(password)
+
 
 class PasswordRequest(BaseModel):
     old_password: UnaliasPasswordType
@@ -86,6 +89,7 @@ class PasswordRequest(BaseModel):
             }
         }
 
+
 class Token(BaseModel):
     access_token: str
-    token_type: str = 'bearer'
+    token_type: str = "bearer"

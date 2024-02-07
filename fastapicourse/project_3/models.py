@@ -2,6 +2,7 @@ from fastapicourse.project_3.database import Base
 from sqlalchemy import Boolean, Column, Integer, String, ForeignKey
 from fastapicourse.project_3 import types
 
+
 class Users(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -27,6 +28,7 @@ class Users(Base):
     def __str__(self):
         return f"User(id={self.id}, username={self.username}, email={self.email}, first_name={self.first_name}, last_name={self.last_name}, hashed_password={self.hashed_password}, is_active={self.is_active}, role={self.role})"
 
+
 class Todos(Base):
     __tablename__ = "todos"
     id = Column(Integer, primary_key=True, index=True)
@@ -41,4 +43,3 @@ class Todos(Base):
         self.description = todo_request.description
         self.priority = todo_request.priority
         self.completed = todo_request.completed
-
